@@ -1,10 +1,12 @@
 package mentormind.ai.llms;
 
 import mentormind.ai.prompts.ConstantsLLMUtils;
+import mentormind.ai.web.AnswerDTO;
 import mentormind.ai.web.AnswerLevel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -32,6 +34,24 @@ public class OpenAILLMImpl implements LLMGenericInterface<String> {
     public String call(String prompt, AnswerLevel level) {
 
 
+        var client = generateClient(prompt, level);
+
+        return client.prompt().call().content();
+    }
+
+    @Override
+    public AnswerDTO callJSON(String question, AnswerLevel level) {
+
+        BeanOutputConverter<AnswerDTO> converter = new BeanOutputConverter<>(AnswerDTO.class);
+        var client = generateClient(question, level);
+
+        return client.prompt()
+                .call()
+                .entity(converter);
+    }
+
+    private ChatClient generateClient( String prompt, AnswerLevel level) {
+
         String promptToUse = createAnswerPrompt(prompt, level);
 
         PromptTemplate promptTemplate = new PromptTemplate(promptToUse);
@@ -43,11 +63,11 @@ public class OpenAILLMImpl implements LLMGenericInterface<String> {
         return this.client
                 .prompt()
                 .user(promptTemplate.getTemplate())
-                .call()
-                .content();
+                .mutate().build();
     }
 
     private String createAnswerPrompt(String question, AnswerLevel level) {
         return String.format(ConstantsLLMUtils.USER_PROMPT_TEMPLATE, question, level.name());
     }
+
 }
