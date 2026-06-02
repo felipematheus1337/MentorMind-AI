@@ -1,9 +1,13 @@
 package mentormind.ai.llms;
 
 import mentormind.ai.prompts.ConstantsLLMUtils;
+import mentormind.ai.web.AnswerLevel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 
@@ -25,11 +29,25 @@ public class OpenAILLMImpl implements LLMGenericInterface<String> {
     }
 
     @Override
-    public String call(String prompt) {
+    public String call(String prompt, AnswerLevel level) {
+
+
+        String promptToUse = createAnswerPrompt(prompt, level);
+
+        PromptTemplate promptTemplate = new PromptTemplate(promptToUse);
+        promptTemplate.render(Map.of(
+                "question", prompt,
+                "level", level.name()
+        ));
+
         return this.client
                 .prompt()
-                .user(prompt)
+                .user(promptTemplate.getTemplate())
                 .call()
                 .content();
+    }
+
+    private String createAnswerPrompt(String question, AnswerLevel level) {
+        return String.format(ConstantsLLMUtils.USER_PROMPT_TEMPLATE, question, level.name());
     }
 }

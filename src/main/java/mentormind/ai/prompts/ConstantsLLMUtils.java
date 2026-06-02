@@ -15,4 +15,13 @@ public class ConstantsLLMUtils {
     public static final String OPENAI_LLM_MODEL = "gpt-5.2";
     public static final double OPENAI_LLM_TEMPERATURE = .99;
     public static final double OPENAI_LLM_TOP_P = .95;
+
+    public static final String USER_PROMPT_TEMPLATE = """
+            Question:
+             %s
+            
+            Answer Level:
+             %s
+            
+            """;
 }
