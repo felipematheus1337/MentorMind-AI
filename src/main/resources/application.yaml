@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: ai
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      base-url: https://api.openai.com/v1
+      timeout: 30s
