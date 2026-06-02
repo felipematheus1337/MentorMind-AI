@@ -1,6 +1,6 @@
 package mentormind.ai.prompts;
 
-public class ConstantsPrompts {
+public class ConstantsLLMUtils {
 
     public static final String SYSTEM_PROMPT = """
             You are a helpful assistant specialized in IT.
@@ -11,4 +11,8 @@ public class ConstantsPrompts {
             
             If the answer dont exist in the documents, say explicitly that the answer is not in the documents, and try to give a general answer based on your knowledge, but always say that the answer is not in the documents.
             """;
+
+    public static final String OPENAI_LLM_MODEL = "gpt-5.2";
+    public static final double OPENAI_LLM_TEMPERATURE = .99;
+    public static final double OPENAI_LLM_TOP_P = .95;
 }
