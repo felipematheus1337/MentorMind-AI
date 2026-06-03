@@ -18,6 +18,8 @@ public class MentorMindController {
 
     private final OpenAILLMImpl openAILLM;
 
+
+
     @GetMapping
     public String getAnswer(@RequestParam(name = "question", required = true) @NotBlank String question,
                             @RequestParam(name = "level", required = true) @NotEmpty AnswerLevel level) {
