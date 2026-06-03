@@ -6,3 +6,18 @@ spring:
       api-key: ${OPENAI_API_KEY}
       base-url: https://api.openai.com/v1
       timeout: 30s
+  vectorstore:
+
+    pgvector:
+      initialize-schema: true
+      dimensions: 1536
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mentormindb
+    username: postgres
+    password: postgres
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
