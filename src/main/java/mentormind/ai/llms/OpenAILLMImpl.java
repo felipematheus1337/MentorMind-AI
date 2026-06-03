@@ -7,6 +7,9 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -22,12 +25,14 @@ public class OpenAILLMImpl implements LLMGenericInterface<String> {
             .topP(ConstantsLLMUtils.OPENAI_LLM_TOP_P)
             .build();
     private final ChatClient client;
+    private final PgVectorStore vectorStore;
 
-    public OpenAILLMImpl(ChatClient.Builder builder) {
+    public OpenAILLMImpl(ChatClient.Builder builder, PgVectorStore vectorStore) {
         this.client = builder
                 .defaultSystem(ConstantsLLMUtils.SYSTEM_PROMPT)
                 .defaultOptions(options.mutate())
                 .build();
+        this.vectorStore = vectorStore;
     }
 
     @Override
@@ -52,12 +57,22 @@ public class OpenAILLMImpl implements LLMGenericInterface<String> {
 
     private ChatClient generateClient( String prompt, AnswerLevel level) {
 
-        String promptToUse = createAnswerPrompt(prompt, level);
+        var context = vectorStore.similaritySearch(SearchRequest
+                .builder()
+                        .query(prompt)
+                        .topK(5)
+                .build());
+
+        var fullRagContext = context.stream().map(Document::getText)
+                .reduce("", (a, b) -> a + "\n---\n" + b);
+
+        String promptToUse = createAnswerPrompt(prompt, level, fullRagContext);
 
         PromptTemplate promptTemplate = new PromptTemplate(promptToUse);
         promptTemplate.render(Map.of(
                 "question", prompt,
-                "level", level.name()
+                "level", level.name(),
+                "context", fullRagContext
         ));
 
         return this.client
@@ -66,8 +81,8 @@ public class OpenAILLMImpl implements LLMGenericInterface<String> {
                 .mutate().build();
     }
 
-    private String createAnswerPrompt(String question, AnswerLevel level) {
-        return String.format(ConstantsLLMUtils.USER_PROMPT_TEMPLATE, question, level.name());
+    private String createAnswerPrompt(String question, AnswerLevel level, String context) {
+        return String.format(ConstantsLLMUtils.USER_PROMPT_TEMPLATE, question, level.name(), context);
     }
 
 }

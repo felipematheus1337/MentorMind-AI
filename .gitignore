@@ -14,6 +14,8 @@ target/
 .sts4-cache
 
 .env
+.claude
+
 
 ### IntelliJ IDEA ###
 .idea

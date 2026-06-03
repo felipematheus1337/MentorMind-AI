@@ -17,6 +17,9 @@ public class ConstantsLLMUtils {
     public static final double OPENAI_LLM_TOP_P = .95;
 
     public static final String USER_PROMPT_TEMPLATE = """
+            Context:
+             %s
+             
             Question:
              %s
             
